@@ -10,8 +10,9 @@ namespace rhel {
 	public partial class MainWindow : Window {
 		System.Windows.Forms.NotifyIcon tray; // yes, we're using Windows.Forms in a WPF project
 		bool saveAccounts = false;
-        public bool LaunchDx9 = false;
+        bool LaunchDx9 = false;
 		EventHandler contextMenuClick;
+        
 
 		public MainWindow() {
 			InitializeComponent();
@@ -143,5 +144,9 @@ namespace rhel {
         public void unsetDX9(object sender, RoutedEventArgs e) {
             this.LaunchDx9 = false;
         }
-	}
+        public bool DX9() {
+            return this.LaunchDx9;
+        }
+        
+    }
 }

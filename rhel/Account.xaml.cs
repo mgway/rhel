@@ -24,6 +24,7 @@ namespace rhel {
 		MainWindow main;
 		string accessToken;
 		DateTime accessTokenExpiration;
+        DateTime updateCheckExpiration;
 
 		public Account(MainWindow main) {
 			InitializeComponent();
@@ -40,11 +41,19 @@ namespace rhel {
 		}
 
 		public void launchAccount() {
+            bool var = this.checkClientVersion();
+            if (!var) {
+                System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe", "-c");
+                repair.WorkingDirectory = this.main.evePath();
+                System.Diagnostics.Process.Start(repair);
+                return;
+            }
 			string exefilePath = Path.Combine(this.main.evePath(), "bin", "ExeFile.exe");
-			if (!File.Exists(exefilePath)) {
-				this.main.showBalloon("eve path", "could not find " + exefilePath, System.Windows.Forms.ToolTipIcon.Error);
-				return;
-			} else if (this.username.Text.Length == 0 || this.password.Password.Length == 0) {
+            if (!File.Exists(exefilePath)) {
+                this.main.showBalloon("eve path", "could not find " + exefilePath, System.Windows.Forms.ToolTipIcon.Error);
+                return;
+            }
+			else if (this.username.Text.Length == 0 || this.password.Password.Length == 0) {
 				this.main.showBalloon("logging in", "missing username or password", System.Windows.Forms.ToolTipIcon.Error);
 				return;
 			}
@@ -63,7 +72,7 @@ namespace rhel {
 			}
 			this.main.showBalloon("logging in", "launching", System.Windows.Forms.ToolTipIcon.None);
             string args = @"/noconsole /ssoToken={0}";
-            if (main.LaunchDx9) {
+            if (main.DX9()) {
                 args = args + " /triPlatform=dx9";
             }
             else {
@@ -129,5 +138,40 @@ namespace rhel {
 		private void credentialsChanged(object sender, EventArgs e) {
 			this.main.updateCredentials();
 		}
+
+        private bool checkClientVersion() {
+            updateEveVersion();
+            StreamReader sr = new StreamReader(this.main.evePath() + "\\start.ini");
+            List<string> lines = new List<string>();
+            while (!sr.EndOfStream) {
+                lines.Add(sr.ReadLine());
+            }
+            sr.Close();
+            int ver = Convert.ToInt32(lines[2].Substring(8));
+
+            StreamReader str = new StreamReader(this.main.evePath() + "\\eveversion");
+            List<string> html = new List<string>();
+            while (!str.EndOfStream) {
+                html.Add(str.ReadLine());
+            }
+            int eveVers = Convert.ToInt32(html[167].Substring(8));
+
+            if (eveVers == ver) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        private void updateEveVersion() {
+            if (DateTime.UtcNow > updateCheckExpiration) {
+                WebClient wc = new WebClient();
+                StreamWriter sw = new StreamWriter(this.main.evePath() + "\\eveversion");
+                sw.Write(wc.DownloadString(new Uri("http://games.chruker.dk/eve_online/server_status.php")));
+                sw.Close();
+                wc.Dispose();
+                updateCheckExpiration = DateTime.UtcNow + TimeSpan.FromHours(11);
+            }
+        }
 	}
 }
