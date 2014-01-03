@@ -62,7 +62,13 @@ namespace rhel {
 				return;
 			}
 			this.main.showBalloon("logging in", "launching", System.Windows.Forms.ToolTipIcon.None);
-			const string args = @"/noconsole /ssoToken={0} /triPlatform=dx11";
+            string args = @"/noconsole /ssoToken={0}";
+            if (main.LaunchDx9) {
+                args = args + " /triPlatform=dx9";
+            }
+            else {
+                args = args + " /triPlatform=dx11";
+            }
 			System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo(
 				@".\bin\ExeFile.exe", String.Format(args, ssoToken)
 			);

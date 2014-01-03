@@ -4,6 +4,7 @@
         Title="Rapid Heavy EVE Launcher" Height="350" Width="390" Loaded="Window_Loaded" Closing="Window_Closing" ResizeMode="CanResize" StateChanged="Window_StateChanged" Icon="/rhel;component/rhel.ico">
     <Grid>
         <TextBox Height="23" Margin="10,10,98,0" Name="txtEvePath" VerticalAlignment="Top" LostFocus="txtEvePath_LostFocus" />
+        <CheckBox Margin="12,39,12,254" Name="dx9" Checked="setDX9" Unchecked="unsetDX9" >Launch using DirectX 9</CheckBox>
         <Button Content="browse" Height="23" HorizontalAlignment="Right" Margin="0,9,12,0" Name="browse" VerticalAlignment="Top" Width="75" Click="browse_Click" />
         <StackPanel Margin="12,61,12,41" Name="accountsPanel"></StackPanel>
         <Button Content="add account" Name="addAccount" Margin="12,0,0,12" Click="addAccount_Click" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="93" />
