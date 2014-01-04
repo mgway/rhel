@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Timers;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
@@ -7,135 +8,137 @@ using System.Windows;
 using System.Collections.Specialized;
 
 namespace rhel {
-	public partial class MainWindow : Window {
-		System.Windows.Forms.NotifyIcon tray; // yes, we're using Windows.Forms in a WPF project
-		bool saveAccounts = false;
+    public partial class MainWindow : Window {
+        System.Windows.Forms.NotifyIcon tray; // yes, we're using Windows.Forms in a WPF project
+        bool saveAccounts = false;
         bool LaunchDx9 = false;
-		EventHandler contextMenuClick;
-        
+        EventHandler contextMenuClick;
+        DateTime updateCheckExpiration = new DateTime();
+        Timer checkUpdate;
 
-		public MainWindow() {
-			InitializeComponent();
-		}
+        public MainWindow() {
+            InitializeComponent();
+        }
 
-		private void Window_Loaded(object sender, RoutedEventArgs e) {
-			if (Properties.Settings.Default.evePath.Length == 0) {
-				string path = null;
-				string appdata = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-				foreach (string dir in Directory.EnumerateDirectories(Path.Combine(appdata, "CCP", "EVE"), "*_tranquility")) {
-					string[] split = dir.Split(new char[] { '_' }, 2);
-					string drive = split[0].Substring(split[0].Length-1);
-					path = split[1].Substring(0, split[1].Length - "_tranquility".Length).Replace('_', Path.DirectorySeparatorChar);
-					path = drive.ToUpper() + Path.VolumeSeparatorChar + Path.DirectorySeparatorChar + path;
-					break;
-				}
-				if (path != null && File.Exists(Path.Combine(path, "bin", "ExeFile.exe"))) {
-					Properties.Settings.Default.evePath = path;
-					Properties.Settings.Default.Save();
-				}
-			}
-			this.txtEvePath.Text = Properties.Settings.Default.evePath;
+        private void Window_Loaded(object sender, RoutedEventArgs e) {
+            if (Properties.Settings.Default.evePath.Length == 0) {
+                string path = null;
+                string appdata = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                foreach (string dir in Directory.EnumerateDirectories(Path.Combine(appdata, "CCP", "EVE"), "*_tranquility")) {
+                    string[] split = dir.Split(new char[] { '_' }, 2);
+                    string drive = split[0].Substring(split[0].Length - 1);
+                    path = split[1].Substring(0, split[1].Length - "_tranquility".Length).Replace('_', Path.DirectorySeparatorChar);
+                    path = drive.ToUpper() + Path.VolumeSeparatorChar + Path.DirectorySeparatorChar + path;
+                    break;
+                }
+                if (path != null && File.Exists(Path.Combine(path, "bin", "ExeFile.exe"))) {
+                    Properties.Settings.Default.evePath = path;
+                    Properties.Settings.Default.Save();
+                }
+            }
 
-			this.tray = new System.Windows.Forms.NotifyIcon();
-			this.tray.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ResourceAssembly.Location);
-			this.tray.Text = this.Title;
-			this.tray.ContextMenu = new System.Windows.Forms.ContextMenu();
-			this.tray.MouseClick += new System.Windows.Forms.MouseEventHandler(this.tray_Click);
-			this.contextMenuClick = new EventHandler(this.contextMenu_Click);
+            this.txtEvePath.Text = Properties.Settings.Default.evePath;
+            this.startUpdateCheck();
+            this.tray = new System.Windows.Forms.NotifyIcon();
+            this.tray.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ResourceAssembly.Location);
+            this.tray.Text = this.Title;
+            this.tray.ContextMenu = new System.Windows.Forms.ContextMenu();
+            this.tray.MouseClick += new System.Windows.Forms.MouseEventHandler(this.tray_Click);
+            this.contextMenuClick = new EventHandler(this.contextMenu_Click);
+            this.tray.ContextMenu.MenuItems.Add("launch all", this.contextMenuClick);
+            this.tray.ContextMenu.MenuItems.Add("-");
+            if (Properties.Settings.Default.accounts != null) {
+                foreach (string credentials in Properties.Settings.Default.accounts) {
+                    Account account = new Account(this);
+                    string[] split = credentials.Split(new char[] { ':' }, 2);
+                    account.username.Text = split[0];
+                    account.password.Password = split[1];
+                    this.accountsPanel.Children.Add(account);
+                    this.tray.ContextMenu.MenuItems.Add(split[0], this.contextMenuClick);
+                }
+            }
+            this.tray.Visible = true;
+            this.saveAccounts = true;
+        }
 
-			this.tray.ContextMenu.MenuItems.Add("launch all", this.contextMenuClick);
-			this.tray.ContextMenu.MenuItems.Add("-");
-			if (Properties.Settings.Default.accounts != null) {
-				foreach (string credentials in Properties.Settings.Default.accounts) {
-					Account account = new Account(this);
-					string[] split = credentials.Split(new char[]{':'}, 2);
-					account.username.Text = split[0];
-					account.password.Password = split[1];
-					this.accountsPanel.Children.Add(account);
-					this.tray.ContextMenu.MenuItems.Add(split[0], this.contextMenuClick);
-				}
-			}
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
+            this.tray.Visible = false;
+        }
 
-			this.tray.Visible = true;
-			this.saveAccounts = true;
-		}
+        private void Window_StateChanged(object sender, EventArgs e) {
+            this.ShowInTaskbar = (this.WindowState != System.Windows.WindowState.Minimized);
+        }
 
-		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
-			this.tray.Visible = false;
-		}
+        private void tray_Click(object sender, System.Windows.Forms.MouseEventArgs e) {
+            if (e.Button == System.Windows.Forms.MouseButtons.Left)
+                this.WindowState = System.Windows.WindowState.Normal;
+        }
 
-		private void Window_StateChanged(object sender, EventArgs e) {
-			this.ShowInTaskbar = (this.WindowState != System.Windows.WindowState.Minimized);
-		}
+        private void contextMenu_Click(object sender, EventArgs e) {
+            string username = ((System.Windows.Forms.MenuItem)sender).Text;
+            if (username == "launch all")
+                foreach (Account account in this.accountsPanel.Children)
+                    account.launchAccount();
+            else
+                foreach (Account account in this.accountsPanel.Children) {
+                    if (account.username.Text == username) {
+                        account.launchAccount();
+                        break;
+                    }
+                }
+        }
 
-		private void tray_Click(object sender, System.Windows.Forms.MouseEventArgs e) {
-			if (e.Button == System.Windows.Forms.MouseButtons.Left)
-				this.WindowState = System.Windows.WindowState.Normal;
-		}
+        private void txtEvePath_LostFocus(object sender, RoutedEventArgs e) {
+            this.evePath(this.txtEvePath.Text);
+        }
 
-		private void contextMenu_Click(object sender, EventArgs e) {
-			string username = ((System.Windows.Forms.MenuItem)sender).Text;
-			if (username == "launch all")
-				foreach (Account account in this.accountsPanel.Children)
-					account.launchAccount();
-			else
-				foreach (Account account in this.accountsPanel.Children) {
-					if (account.username.Text == username) {
-						account.launchAccount();
-						break;
-					}
-				}
-		}
+        private void browse_Click(object sender, RoutedEventArgs e) {
+            System.Windows.Forms.FolderBrowserDialog fbd = new System.Windows.Forms.FolderBrowserDialog();
+            fbd.ShowNewFolderButton = false;
+            fbd.SelectedPath = this.txtEvePath.Text;
+            if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK) {
+                this.txtEvePath.Text = fbd.SelectedPath;
+                this.evePath(fbd.SelectedPath);
+            }
+        }
 
-		private void txtEvePath_LostFocus(object sender, RoutedEventArgs e) {
-			this.evePath(this.txtEvePath.Text);
-		}
+        private void addAccount_Click(object sender, RoutedEventArgs e) {
+            Account account = new Account(this);
+            this.accountsPanel.Children.Add(account);
+        }
 
-		private void browse_Click(object sender, RoutedEventArgs e) {
-			System.Windows.Forms.FolderBrowserDialog fbd = new System.Windows.Forms.FolderBrowserDialog();
-			fbd.ShowNewFolderButton = false;
-			fbd.SelectedPath = this.txtEvePath.Text;
-			if (fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK) {
-				this.txtEvePath.Text = fbd.SelectedPath;
-				this.evePath(fbd.SelectedPath);
-			}
-		}
+        public string evePath() {
+            return Properties.Settings.Default.evePath;
+        }
 
-		private void addAccount_Click(object sender, RoutedEventArgs e) {
-			Account account = new Account(this);
-			this.accountsPanel.Children.Add(account);
-		}
+        public void evePath(string path) {
+            string exefilePath = Path.Combine(path, "bin", "ExeFile.exe");
+            if (File.Exists(exefilePath)) {
+                Properties.Settings.Default.evePath = path;
+                Properties.Settings.Default.Save();
+            }
+            else
+                this.showBalloon("eve path", "could not find " + exefilePath, System.Windows.Forms.ToolTipIcon.Error);
+        }
 
-		public string evePath() {
-			return Properties.Settings.Default.evePath;
-		}
-		public void evePath(string path) {
-			string exefilePath = Path.Combine(path, "bin", "ExeFile.exe");
-			if (File.Exists(exefilePath)) {
-				Properties.Settings.Default.evePath = path;
-				Properties.Settings.Default.Save();
-			} else
-				this.showBalloon("eve path", "could not find " + exefilePath, System.Windows.Forms.ToolTipIcon.Error);
-		}
+        public void updateCredentials() {
+            if (!this.saveAccounts) // don't save accounts when we're still loading them into textboxes
+                return;
+            StringCollection accounts = new StringCollection();
+            while (this.tray.ContextMenu.MenuItems.Count > 2) // remove everything but "launch all" and separator
+                this.tray.ContextMenu.MenuItems.RemoveAt(this.tray.ContextMenu.MenuItems.Count - 1);
+            foreach (Account account in this.accountsPanel.Children) {
+                string credentials = String.Format("{0}:{1}", account.username.Text, account.password.Password);
+                accounts.Add(credentials);
+                this.tray.ContextMenu.MenuItems.Add(account.username.Text, this.contextMenuClick);
+            }
+            Properties.Settings.Default.accounts = accounts;
+            Properties.Settings.Default.Save();
+        }
 
-		public void updateCredentials() {
-			if (!this.saveAccounts) // don't save accounts when we're still loading them into textboxes
-				return;
-			StringCollection accounts = new StringCollection();
-			while (this.tray.ContextMenu.MenuItems.Count > 2) // remove everything but "launch all" and separator
-				this.tray.ContextMenu.MenuItems.RemoveAt(this.tray.ContextMenu.MenuItems.Count - 1);
-			foreach (Account account in this.accountsPanel.Children) {
-				string credentials = String.Format("{0}:{1}", account.username.Text, account.password.Password);
-				accounts.Add(credentials);
-				this.tray.ContextMenu.MenuItems.Add(account.username.Text, this.contextMenuClick);
-			}
-			Properties.Settings.Default.accounts = accounts;
-			Properties.Settings.Default.Save();
-		}
-
-		public void showBalloon(string title, string text, System.Windows.Forms.ToolTipIcon icon) {
-			this.tray.ShowBalloonTip(1000, title, text, icon);
-		}
+        public void showBalloon(string title, string text, System.Windows.Forms.ToolTipIcon icon) {
+            this.tray.ShowBalloonTip(1000, title, text, icon);
+        }
 
         public void setDX9(object sender, RoutedEventArgs e) {
             this.LaunchDx9 = true;
@@ -144,9 +147,71 @@ namespace rhel {
         public void unsetDX9(object sender, RoutedEventArgs e) {
             this.LaunchDx9 = false;
         }
+
         public bool DX9() {
             return this.LaunchDx9;
         }
-        
+
+        public DateTime getUpdateTime() {
+            return this.updateCheckExpiration;
+        }
+
+        public void setUpdateTime(DateTime dt) {
+            this.updateCheckExpiration = dt;
+        }
+
+        public bool checkClientVersion() {
+            this.updateEveVersion();
+            StreamReader sr = new StreamReader(this.evePath() + "\\start.ini");
+            List<string> lines = new List<string>();
+            while (!sr.EndOfStream) {
+                lines.Add(sr.ReadLine());
+            }
+            sr.Close();
+            int clientVers = Convert.ToInt32(lines[2].Substring(8));
+            StreamReader str = new StreamReader(this.evePath() + "\\eveversion");
+            List<string> html = new List<string>();
+            while (!str.EndOfStream) {
+                html.Add(str.ReadLine());
+            }
+            int serverVers = Convert.ToInt32(html[167].Substring(8));
+            if (serverVers == clientVers) {
+                return true;
+            }
+            else {
+                System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe", "-c");
+                repair.WorkingDirectory = this.evePath();
+                System.Diagnostics.Process.Start(repair);
+                return false;
+            }
+        }
+
+        private void updateEveVersion() {
+            if (DateTime.UtcNow > this.getUpdateTime()) {
+                System.Net.WebClient wc = new System.Net.WebClient();
+                StreamWriter sw = new StreamWriter(this.evePath() + "\\eveversion");
+                sw.Write(wc.DownloadString(new Uri("http://games.chruker.dk/eve_online/server_status.php")));
+                sw.Close();
+                wc.Dispose();
+                updateCheckExpiration = (DateTime.UtcNow + TimeSpan.FromHours(1));
+            }
+        }
+
+        private void timedUpdate() {
+            if (!this.checkClientVersion()) {
+
+            }
+        }
+
+        private void startUpdateCheck() {
+            checkUpdate = new Timer(3600000);
+            checkUpdate.Enabled = true;
+            checkUpdate.Elapsed += new ElapsedEventHandler(checkUpdate_Elapsed);
+            updateCheckExpiration = (DateTime.UtcNow + TimeSpan.FromHours(1));
+        }
+
+        private void checkUpdate_Elapsed(object source, ElapsedEventArgs e) {
+            this.timedUpdate();
+        }
     }
 }

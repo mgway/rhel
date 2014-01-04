@@ -17,60 +17,56 @@ using System.Windows.Shapes;
 */
 
 namespace rhel {
-	/// <summary>
-	/// Interaction logic for UserControl1.xaml
-	/// </summary>
-	public partial class Account : UserControl {
-		MainWindow main;
-		string accessToken;
-		DateTime accessTokenExpiration;
-        DateTime updateCheckExpiration;
+    /// <summary>
+    /// Interaction logic for UserControl1.xaml
+    /// </summary>
+    public partial class Account : UserControl {
+        MainWindow main;
+        string accessToken;
+        DateTime accessTokenExpiration;
 
-		public Account(MainWindow main) {
-			InitializeComponent();
-			this.main = main;
-		}
+        public Account(MainWindow main) {
+            InitializeComponent();
+            this.main = main;
+        }
 
-		private void launch_Click(object sender, RoutedEventArgs e) {
-			this.launchAccount();
-		}
+        private void launch_Click(object sender, RoutedEventArgs e) {
+            this.launchAccount();
+        }
 
-		private void delete_Click(object sender, RoutedEventArgs e) {
-			this.main.accountsPanel.Children.Remove(this);
-			this.main.updateCredentials();
-		}
+        private void delete_Click(object sender, RoutedEventArgs e) {
+            this.main.accountsPanel.Children.Remove(this);
+            this.main.updateCredentials();
+        }
 
-		public void launchAccount() {
-            bool var = this.checkClientVersion();
-            if (!var) {
-                System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe", "-c");
-                repair.WorkingDirectory = this.main.evePath();
-                System.Diagnostics.Process.Start(repair);
+        public void launchAccount() {
+            if (!this.main.checkClientVersion()) {
                 return;
             }
-			string exefilePath = Path.Combine(this.main.evePath(), "bin", "ExeFile.exe");
+            string exefilePath = Path.Combine(this.main.evePath(), "bin", "ExeFile.exe");
             if (!File.Exists(exefilePath)) {
                 this.main.showBalloon("eve path", "could not find " + exefilePath, System.Windows.Forms.ToolTipIcon.Error);
                 return;
             }
-			else if (this.username.Text.Length == 0 || this.password.Password.Length == 0) {
-				this.main.showBalloon("logging in", "missing username or password", System.Windows.Forms.ToolTipIcon.Error);
-				return;
-			}
-			this.main.showBalloon("logging in", this.username.Text, System.Windows.Forms.ToolTipIcon.None);
-			string ssoToken = null;
-			try {
-				ssoToken = this.getSSOToken(this.username.Text, this.password.Password);
-			} catch (WebException e) {
-				this.accessToken = null;
-				this.main.showBalloon("logging in", e.Message, System.Windows.Forms.ToolTipIcon.Error);
-				return;
-			}
-			if (ssoToken == null) {
-				this.main.showBalloon("logging in", "invalid username/password", System.Windows.Forms.ToolTipIcon.Error);
-				return;
-			}
-			this.main.showBalloon("logging in", "launching", System.Windows.Forms.ToolTipIcon.None);
+            else if (this.username.Text.Length == 0 || this.password.Password.Length == 0) {
+                this.main.showBalloon("logging in", "missing username or password", System.Windows.Forms.ToolTipIcon.Error);
+                return;
+            }
+            this.main.showBalloon("logging in", this.username.Text, System.Windows.Forms.ToolTipIcon.None);
+            string ssoToken = null;
+            try {
+                ssoToken = this.getSSOToken(this.username.Text, this.password.Password);
+            }
+            catch (WebException e) {
+                this.accessToken = null;
+                this.main.showBalloon("logging in", e.Message, System.Windows.Forms.ToolTipIcon.Error);
+                return;
+            }
+            if (ssoToken == null) {
+                this.main.showBalloon("logging in", "invalid username/password", System.Windows.Forms.ToolTipIcon.Error);
+                return;
+            }
+            this.main.showBalloon("logging in", "launching", System.Windows.Forms.ToolTipIcon.None);
             string args = @"/noconsole /ssoToken={0}";
             if (main.DX9()) {
                 args = args + " /triPlatform=dx9";
@@ -78,100 +74,65 @@ namespace rhel {
             else {
                 args = args + " /triPlatform=dx11";
             }
-			System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo(
-				@".\bin\ExeFile.exe", String.Format(args, ssoToken)
-			);
-			psi.WorkingDirectory = this.main.evePath();
-			System.Diagnostics.Process.Start(psi);
-		}
-
-		private string getAccessToken(string username, string password) {
-			if (this.accessToken != null && DateTime.UtcNow < this.accessTokenExpiration)
-				return this.accessToken;
-			const string uri = "https://login.eveonline.com/Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Flogin.eveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken";
-			HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(uri);
-			req.Timeout = 5000;
-			req.AllowAutoRedirect = true;
-			req.Headers.Add("Origin", "https://login.eveonline.com");
-			req.Referer = uri;
-			req.CookieContainer = new CookieContainer(8);
-			req.Method = "POST";
-			req.ContentType = "application/x-www-form-urlencoded";
-			byte[] body = Encoding.ASCII.GetBytes(String.Format("UserName={0}&Password={1}", username, Uri.EscapeDataString(password)));
-			req.ContentLength = body.Length;
-			Stream reqStream = req.GetRequestStream();
-			reqStream.Write(body, 0, body.Length);
-			reqStream.Close();
-			HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
-			// https://login.eveonline.com/launcher?client_id=eveLauncherTQ#access_token=...&token_type=Bearer&expires_in=43200
-			string accessToken = this.extractAccessToken(resp.ResponseUri.Fragment);
-			resp.Close(); // WTF.NET http://stackoverflow.com/questions/11712232/ and http://stackoverflow.com/questions/1500955/
-			this.accessToken = accessToken;
-			this.accessTokenExpiration = DateTime.UtcNow + TimeSpan.FromHours(11); // expiry is 12 hours; we use 11 to be safe
-			return accessToken;
-		}
-
-		private string getSSOToken(string username, string password) {
-			string accessToken = this.getAccessToken(username, password);
-			if (accessToken == null)
-				return null;
-			string uri = "https://login.eveonline.com/launcher/token?accesstoken=" + accessToken;
-			HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(uri);
-			req.Timeout = 5000;
-			req.AllowAutoRedirect = false;
-			HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
-			string ssoToken = this.extractAccessToken(resp.GetResponseHeader("Location"));
-			resp.Close();
-			return ssoToken;
-		}
-
-		private string extractAccessToken(string urlFragment) {
-			const string search = "#access_token=";
-			int start = urlFragment.IndexOf(search);
-			if (start == -1)
-				return null;
-			start += search.Length;
-			string accessToken = urlFragment.Substring(start, urlFragment.IndexOf('&') - start);
-			return accessToken;
-		}
-
-		private void credentialsChanged(object sender, EventArgs e) {
-			this.main.updateCredentials();
-		}
-
-        private bool checkClientVersion() {
-            updateEveVersion();
-            StreamReader sr = new StreamReader(this.main.evePath() + "\\start.ini");
-            List<string> lines = new List<string>();
-            while (!sr.EndOfStream) {
-                lines.Add(sr.ReadLine());
-            }
-            sr.Close();
-            int ver = Convert.ToInt32(lines[2].Substring(8));
-
-            StreamReader str = new StreamReader(this.main.evePath() + "\\eveversion");
-            List<string> html = new List<string>();
-            while (!str.EndOfStream) {
-                html.Add(str.ReadLine());
-            }
-            int eveVers = Convert.ToInt32(html[167].Substring(8));
-
-            if (eveVers == ver) {
-                return true;
-            }
-            else {
-                return false;
-            }
+            System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo(
+                @".\bin\ExeFile.exe", String.Format(args, ssoToken)
+            );
+            psi.WorkingDirectory = this.main.evePath();
+            System.Diagnostics.Process.Start(psi);
         }
-        private void updateEveVersion() {
-            if (DateTime.UtcNow > updateCheckExpiration) {
-                WebClient wc = new WebClient();
-                StreamWriter sw = new StreamWriter(this.main.evePath() + "\\eveversion");
-                sw.Write(wc.DownloadString(new Uri("http://games.chruker.dk/eve_online/server_status.php")));
-                sw.Close();
-                wc.Dispose();
-                updateCheckExpiration = DateTime.UtcNow + TimeSpan.FromHours(11);
-            }
+
+        private string getAccessToken(string username, string password) {
+            if (this.accessToken != null && DateTime.UtcNow < this.accessTokenExpiration)
+                return this.accessToken;
+            const string uri = "https://login.eveonline.com/Account/LogOn?ReturnUrl=%2Foauth%2Fauthorize%2F%3Fclient_id%3DeveLauncherTQ%26lang%3Den%26response_type%3Dtoken%26redirect_uri%3Dhttps%3A%2F%2Flogin.eveonline.com%2Flauncher%3Fclient_id%3DeveLauncherTQ%26scope%3DeveClientToken";
+            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(uri);
+            req.Timeout = 5000;
+            req.AllowAutoRedirect = true;
+            req.Headers.Add("Origin", "https://login.eveonline.com");
+            req.Referer = uri;
+            req.CookieContainer = new CookieContainer(8);
+            req.Method = "POST";
+            req.ContentType = "application/x-www-form-urlencoded";
+            byte[] body = Encoding.ASCII.GetBytes(String.Format("UserName={0}&Password={1}", username, Uri.EscapeDataString(password)));
+            req.ContentLength = body.Length;
+            Stream reqStream = req.GetRequestStream();
+            reqStream.Write(body, 0, body.Length);
+            reqStream.Close();
+            HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
+            // https://login.eveonline.com/launcher?client_id=eveLauncherTQ#access_token=...&token_type=Bearer&expires_in=43200
+            string accessToken = this.extractAccessToken(resp.ResponseUri.Fragment);
+            resp.Close(); // WTF.NET http://stackoverflow.com/questions/11712232/ and http://stackoverflow.com/questions/1500955/
+            this.accessToken = accessToken;
+            this.accessTokenExpiration = DateTime.UtcNow + TimeSpan.FromHours(11); // expiry is 12 hours; we use 11 to be safe
+            return accessToken;
         }
-	}
+
+        private string getSSOToken(string username, string password) {
+            string accessToken = this.getAccessToken(username, password);
+            if (accessToken == null)
+                return null;
+            string uri = "https://login.eveonline.com/launcher/token?accesstoken=" + accessToken;
+            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(uri);
+            req.Timeout = 5000;
+            req.AllowAutoRedirect = false;
+            HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
+            string ssoToken = this.extractAccessToken(resp.GetResponseHeader("Location"));
+            resp.Close();
+            return ssoToken;
+        }
+
+        private string extractAccessToken(string urlFragment) {
+            const string search = "#access_token=";
+            int start = urlFragment.IndexOf(search);
+            if (start == -1)
+                return null;
+            start += search.Length;
+            string accessToken = urlFragment.Substring(start, urlFragment.IndexOf('&') - start);
+            return accessToken;
+        }
+
+        private void credentialsChanged(object sender, EventArgs e) {
+            this.main.updateCredentials();
+        }
+    }
 }
