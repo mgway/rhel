@@ -12,6 +12,7 @@ namespace rhel {
         System.Windows.Forms.NotifyIcon tray; // yes, we're using Windows.Forms in a WPF project
         bool saveAccounts = false;
         bool LaunchDx9 = false;
+        int eveVersion;
         EventHandler contextMenuClick;
         DateTime updateCheckExpiration = new DateTime();
         Timer checkUpdate;
@@ -38,7 +39,6 @@ namespace rhel {
             }
 
             this.txtEvePath.Text = Properties.Settings.Default.evePath;
-            this.startUpdateCheck();
             this.tray = new System.Windows.Forms.NotifyIcon();
             this.tray.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ResourceAssembly.Location);
             this.tray.Text = this.Title;
@@ -59,6 +59,7 @@ namespace rhel {
             }
             this.tray.Visible = true;
             this.saveAccounts = true;
+            this.startUpdateCheck();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
@@ -169,13 +170,7 @@ namespace rhel {
             }
             sr.Close();
             int clientVers = Convert.ToInt32(lines[2].Substring(8));
-            StreamReader str = new StreamReader(this.evePath() + "\\eveversion");
-            List<string> html = new List<string>();
-            while (!str.EndOfStream) {
-                html.Add(str.ReadLine());
-            }
-            int serverVers = Convert.ToInt32(html[167].Substring(8));
-            if (serverVers == clientVers) {
+            if (this.eveVersion == clientVers) {
                 return true;
             }
             else {
@@ -189,9 +184,9 @@ namespace rhel {
         private void updateEveVersion() {
             if (DateTime.UtcNow > this.getUpdateTime()) {
                 System.Net.WebClient wc = new System.Net.WebClient();
-                StreamWriter sw = new StreamWriter(this.evePath() + "\\eveversion");
-                sw.Write(wc.DownloadString(new Uri("http://games.chruker.dk/eve_online/server_status.php")));
-                sw.Close();
+                string ds = wc.DownloadString(new Uri("http://games.chruker.dk/eve_online/server_status.php"));
+                string[] var = ds.Split(new string[] { "\n", "\r\n"}, StringSplitOptions.None);
+                this.eveVersion = Convert.ToInt32(var[167].Substring(8));
                 wc.Dispose();
                 updateCheckExpiration = (DateTime.UtcNow + TimeSpan.FromHours(1));
             }
@@ -199,7 +194,6 @@ namespace rhel {
 
         private void timedUpdate() {
             if (!this.checkClientVersion()) {
-
             }
         }
 
@@ -207,7 +201,6 @@ namespace rhel {
             checkUpdate = new Timer(3600000);
             checkUpdate.Enabled = true;
             checkUpdate.Elapsed += new ElapsedEventHandler(checkUpdate_Elapsed);
-            updateCheckExpiration = (DateTime.UtcNow + TimeSpan.FromHours(1));
         }
 
         private void checkUpdate_Elapsed(object source, ElapsedEventArgs e) {
