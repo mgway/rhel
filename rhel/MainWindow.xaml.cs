@@ -57,6 +57,26 @@ namespace rhel {
                     this.tray.ContextMenu.MenuItems.Add(split[0], this.contextMenuClick);
                 }
             }
+            this.tray.ContextMenu.MenuItems.Add("-");
+            if (Properties.Settings.Default.groups != null) {
+                foreach (string gp in Properties.Settings.Default.groups) {
+                    Group G = new Group(this);
+                    string[] split = gp.Split(new char[] { ':' });
+                    foreach (string s in split) {
+                        if (s == split[0]) {
+                            G.groupname.Text = s;
+                        }
+                        else {
+                            foreach (Account account in this.accountsPanel.Children) {
+                                if (s == account.username.Text) {
+                                    G.addAccount(account);
+                                }
+                            }
+                        }
+                    }
+                    this.groupsPanel.Children.Add(G);
+                }
+            }
             this.tray.Visible = true;
             this.saveAccounts = true;
             this.startUpdateCheck();
@@ -108,6 +128,11 @@ namespace rhel {
             this.accountsPanel.Children.Add(account);
         }
 
+        private void addGroup_Click(object sender, RoutedEventArgs e) {
+            Group group = new Group(this);
+            this.groupsPanel.Children.Add(group);
+        }
+
         public string evePath() {
             return Properties.Settings.Default.evePath;
         }
@@ -137,6 +162,20 @@ namespace rhel {
             Properties.Settings.Default.Save();
         }
 
+        public void updateGroups() {
+            if (!this.saveAccounts)
+                return;
+            StringCollection groups = new StringCollection();
+            foreach (Group gp in this.groupsPanel.Children) {
+                string gName = gp.groupname.Text + ":";
+                foreach (Account acct in gp.getAccounts()) {
+                    gName += (acct.username.Text + ":");
+                }
+                groups.Add(gName);
+            }
+            Properties.Settings.Default.groups = groups;
+            Properties.Settings.Default.Save();
+        }
         public void showBalloon(string title, string text, System.Windows.Forms.ToolTipIcon icon) {
             this.tray.ShowBalloonTip(1000, title, text, icon);
         }

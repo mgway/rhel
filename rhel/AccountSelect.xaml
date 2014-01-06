@@ -1,0 +1,12 @@
+﻿<UserControl x:Class="rhel.AccountSelect"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" Name="accountselect" Margin="0" Height="43" Width="350">
+    <Grid Width="350" Height="40">
+        <RadioButton Name ="primary" Content="Doesn't work yet" Margin="0,12,25,12" HorizontalAlignment="Right" Checked="primaryAcctChecked" />
+        <CheckBox Margin="0,12,132,12" Name="groupCheck" Content="Add to group" HorizontalAlignment="Right" Width="97"></CheckBox>
+        <TextBox Name="usern" Height="23" Margin="12,9,239,8" />
+    </Grid>
+</UserControl>
