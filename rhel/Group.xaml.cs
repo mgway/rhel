@@ -73,5 +73,10 @@ namespace rhel {
             }
             this.main.updateGroups();
         }
+        public void launchGroup() {
+            foreach (Account account in this.accounts) {
+                account.launchAccount();
+            }
+        }
     }
 }

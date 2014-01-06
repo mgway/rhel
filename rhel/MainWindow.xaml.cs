@@ -54,7 +54,6 @@ namespace rhel {
                     account.username.Text = split[0];
                     account.password.Password = split[1];
                     this.accountsPanel.Children.Add(account);
-                    this.tray.ContextMenu.MenuItems.Add(split[0], this.contextMenuClick);
                 }
             }
             this.tray.ContextMenu.MenuItems.Add("-");
@@ -77,6 +76,7 @@ namespace rhel {
                     this.groupsPanel.Children.Add(G);
                 }
             }
+            this.popContextMenu();
             this.tray.Visible = true;
             this.saveAccounts = true;
             this.startUpdateCheck();
@@ -100,13 +100,33 @@ namespace rhel {
             if (username == "launch all")
                 foreach (Account account in this.accountsPanel.Children)
                     account.launchAccount();
-            else
+            else {
                 foreach (Account account in this.accountsPanel.Children) {
                     if (account.username.Text == username) {
                         account.launchAccount();
                         break;
                     }
                 }
+                foreach (Group group in this.groupsPanel.Children) {
+                    if (group.groupname.Text == username) {
+                        group.launchGroup();
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void popContextMenu() {
+            while (this.tray.ContextMenu.MenuItems.Count > 2) {
+                this.tray.ContextMenu.MenuItems.RemoveAt(this.tray.ContextMenu.MenuItems.Count - 1);
+            }
+            foreach (Account account in this.accountsPanel.Children) {
+                this.tray.ContextMenu.MenuItems.Add(account.username.Text, this.contextMenuClick);
+            }
+            this.tray.ContextMenu.MenuItems.Add("-");
+            foreach (Group group in this.groupsPanel.Children) {
+                this.tray.ContextMenu.MenuItems.Add(group.groupname.Text, this.contextMenu_Click);
+            }
         }
 
         private void txtEvePath_LostFocus(object sender, RoutedEventArgs e) {
@@ -151,15 +171,13 @@ namespace rhel {
             if (!this.saveAccounts) // don't save accounts when we're still loading them into textboxes
                 return;
             StringCollection accounts = new StringCollection();
-            while (this.tray.ContextMenu.MenuItems.Count > 2) // remove everything but "launch all" and separator
-                this.tray.ContextMenu.MenuItems.RemoveAt(this.tray.ContextMenu.MenuItems.Count - 1);
             foreach (Account account in this.accountsPanel.Children) {
                 string credentials = String.Format("{0}:{1}", account.username.Text, account.password.Password);
                 accounts.Add(credentials);
-                this.tray.ContextMenu.MenuItems.Add(account.username.Text, this.contextMenuClick);
             }
             Properties.Settings.Default.accounts = accounts;
             Properties.Settings.Default.Save();
+            this.popContextMenu();
         }
 
         public void updateGroups() {
@@ -175,6 +193,7 @@ namespace rhel {
             }
             Properties.Settings.Default.groups = groups;
             Properties.Settings.Default.Save();
+            this.popContextMenu();
         }
         public void showBalloon(string title, string text, System.Windows.Forms.ToolTipIcon icon) {
             this.tray.ShowBalloonTip(1000, title, text, icon);
