@@ -25,25 +25,12 @@ namespace rhel {
             this.user = user;
             this.usern.Text = this.user;
             this.gs = gs;
-            this.primary.IsChecked = false;
 
-            foreach (Account acct in gs.parent.getAccounts()) {
+            foreach (Account acct in this.gs.getParent().getAccounts()) {
                 if (this.user == acct.username.Text) {
                     this.groupCheck.IsChecked = true;
                 }
             }
-        }
-
-        private void primaryAcctChecked(object sender, RoutedEventArgs e) {
-            foreach (AccountSelect accts in gs.selectPanel.Children) {
-                if (accts != this) {
-                    accts.uncheckPrimary();
-                }
-            }
-        }
-
-        private void uncheckPrimary() {
-            this.primary.IsChecked = false;
         }
     }
 }

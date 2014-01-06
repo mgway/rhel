@@ -224,7 +224,7 @@ namespace rhel {
             if (DateTime.UtcNow > this.getUpdateTime()) {
                 System.Net.WebClient wc = new System.Net.WebClient();
                 string ds = wc.DownloadString(new Uri("http://games.chruker.dk/eve_online/server_status.php"));
-                string[] var = ds.Split(new string[] { "\n", "\r\n"}, StringSplitOptions.None);
+                string[] var = ds.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.None);
                 this.eveVersion = Convert.ToInt32(var[167].Substring(8));
                 wc.Dispose();
                 updateCheckExpiration = (DateTime.UtcNow + TimeSpan.FromHours(1));

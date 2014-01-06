@@ -24,7 +24,6 @@ namespace rhel {
             InitializeComponent();
             this.main = main;
             this.accounts = new List<Account>();
-            
         }
 
         private void delete_Click(object sender, RoutedEventArgs e) {
@@ -67,6 +66,7 @@ namespace rhel {
             }
             this.main.updateGroups();
         }
+
         public void addAccount(Account acct) {
             if (!this.accounts.Contains(acct)) {
                 this.accounts.Add(acct);

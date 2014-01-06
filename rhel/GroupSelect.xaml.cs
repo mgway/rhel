@@ -16,12 +16,12 @@ namespace rhel {
     /// Interaction logic for GroupSelect.xaml
     /// </summary>
     public partial class GroupSelect : Window {
-        public Group parent;
+        Group parentGroup;
         MainWindow main;
         public GroupSelect(MainWindow main, Group group) {
             InitializeComponent();
             this.main = main;
-            this.parent = group;
+            this.parentGroup = group;
             this.addAccounts();
             this.Title = group.groupname.ToString().Substring(33);
         }
@@ -31,12 +31,12 @@ namespace rhel {
                 if (Convert.ToBoolean(acct.groupCheck.IsChecked)) {
                     foreach (Account account in this.main.accountsPanel.Children) {
                         if (account.username.Text == acct.user) {
-                            this.parent.addAccount(account);
+                            this.parentGroup.addAccount(account);
                         }
                     }
                 }
                 else {
-                    this.parent.removeAccount(acct);
+                    this.parentGroup.removeAccount(acct);
                 }
             }
             this.Close();
@@ -46,6 +46,9 @@ namespace rhel {
                 AccountSelect acct = new AccountSelect(account.username.Text, this);
                 this.selectPanel.Children.Add(acct);
             }
+        }
+        public Group getParent() {
+            return this.parentGroup;
         }
     }
 }
