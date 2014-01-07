@@ -22,9 +22,10 @@ namespace rhel {
 
         public MainWindow() {
             InitializeComponent();
-            string[] key = this.getKey();
-            this.rjm.Key = Convert.FromBase64String(key[0]);
-            this.rjm.IV = Convert.FromBase64String(key[1]);
+            string key = this.getKey();
+            string iv = this.getIV();
+            this.rjm.Key = Convert.FromBase64String(key);
+            this.rjm.IV = Convert.FromBase64String(iv);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -261,7 +262,6 @@ namespace rhel {
         }
 
         private void startUpdateCheck() {
-            this.checkClientVersion();
             checkUpdate = new Timer(3600000);
             checkUpdate.Enabled = true;
             checkUpdate.Elapsed += new ElapsedEventHandler(checkUpdate_Elapsed);
@@ -277,27 +277,27 @@ namespace rhel {
             System.Diagnostics.Process.Start(repair);
         }
 
-        private string[] getKey() {
-            try {
-                StreamReader sr = new StreamReader(this.evePath() + "\\keyfile");
-                string[] ret = new string[2];
-                ret[0] = sr.ReadLine();
-                ret[1] = sr.ReadLine();
-                sr.Close();
-                return ret;
+        private string getKey() {
+            if (Properties.Settings.Default.Key != null && Properties.Settings.Default.Key != "") {
+                return Properties.Settings.Default.Key;
             }
-            catch  {
-                RijndaelManaged rjm = new RijndaelManaged();
-                rjm.GenerateKey();
-                rjm.GenerateIV();
-                string[] key = new string[2];
-                key[0] = Convert.ToBase64String(rjm.Key);
-                key[1] = Convert.ToBase64String(rjm.IV);
-                StreamWriter sw = new StreamWriter(this.evePath() + "\\keyfile");
-                sw.WriteLine(key[0]);
-                sw.WriteLine(key[1]);
-                sw.Close();
-                return key;
+            else {
+                this.rjm.GenerateKey();
+                Properties.Settings.Default.Key = Convert.ToBase64String(this.rjm.Key);
+                Properties.Settings.Default.Save();
+                return Properties.Settings.Default.Key;
+            }
+        }
+
+        private string getIV() {
+            if (Properties.Settings.Default.IV != null && Properties.Settings.Default.IV != "") {
+                return Properties.Settings.Default.IV;
+            }
+            else {
+                this.rjm.GenerateIV();
+                Properties.Settings.Default.IV = Convert.ToBase64String(this.rjm.IV);
+                Properties.Settings.Default.Save();
+                return Properties.Settings.Default.IV;
             }
         }
 
@@ -308,6 +308,7 @@ namespace rhel {
             string epass = Convert.ToBase64String(encrypted);
             return epass;
         }
+
         private string decryptPass(RijndaelManaged rin, string epass) {
             ICryptoTransform decryptor = rin.CreateDecryptor();
             byte[] pass = Convert.FromBase64String(epass);
