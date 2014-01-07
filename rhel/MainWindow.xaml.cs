@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Collections.Specialized;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace rhel {
     public partial class MainWindow : Window {
@@ -16,9 +18,13 @@ namespace rhel {
         EventHandler contextMenuClick;
         DateTime updateCheckExpiration = new DateTime();
         Timer checkUpdate;
+        RijndaelManaged rjm = new RijndaelManaged();
 
         public MainWindow() {
             InitializeComponent();
+            string[] key = this.getKey();
+            this.rjm.Key = Convert.FromBase64String(key[0]);
+            this.rjm.IV = Convert.FromBase64String(key[1]);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -37,7 +43,6 @@ namespace rhel {
                     Properties.Settings.Default.Save();
                 }
             }
-
             this.txtEvePath.Text = Properties.Settings.Default.evePath;
             this.tray = new System.Windows.Forms.NotifyIcon();
             this.tray.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ResourceAssembly.Location);
@@ -52,7 +57,7 @@ namespace rhel {
                     Account account = new Account(this);
                     string[] split = credentials.Split(new char[] { ':' }, 2);
                     account.username.Text = split[0];
-                    account.password.Password = split[1];
+                    account.password.Password = this.decryptPass(rjm, split[1]);
                     this.accountsPanel.Children.Add(account);
                 }
             }
@@ -172,7 +177,7 @@ namespace rhel {
                 return;
             StringCollection accounts = new StringCollection();
             foreach (Account account in this.accountsPanel.Children) {
-                string credentials = String.Format("{0}:{1}", account.username.Text, account.password.Password);
+                string credentials = String.Format("{0}:{1}", account.username.Text, this.encryptPass(this.rjm,account.password.Password));
                 accounts.Add(credentials);
             }
             Properties.Settings.Default.accounts = accounts;
@@ -270,6 +275,45 @@ namespace rhel {
             System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe", "-c");
             repair.WorkingDirectory = this.evePath();
             System.Diagnostics.Process.Start(repair);
+        }
+
+        private string[] getKey() {
+            try {
+                StreamReader sr = new StreamReader(this.evePath() + "\\keyfile");
+                string[] ret = new string[2];
+                ret[0] = sr.ReadLine();
+                ret[1] = sr.ReadLine();
+                sr.Close();
+                return ret;
+            }
+            catch  {
+                RijndaelManaged rjm = new RijndaelManaged();
+                rjm.GenerateKey();
+                rjm.GenerateIV();
+                string[] key = new string[2];
+                key[0] = Convert.ToBase64String(rjm.Key);
+                key[1] = Convert.ToBase64String(rjm.IV);
+                StreamWriter sw = new StreamWriter(this.evePath() + "\\keyfile");
+                sw.WriteLine(key[0]);
+                sw.WriteLine(key[1]);
+                sw.Close();
+                return key;
+            }
+        }
+
+        private string encryptPass(RijndaelManaged rin, string pass) {
+            ICryptoTransform encryptor = rin.CreateEncryptor();
+            byte[] inblock = Encoding.Unicode.GetBytes(pass);
+            byte[] encrypted = encryptor.TransformFinalBlock(inblock, 0, inblock.Length);
+            string epass = Convert.ToBase64String(encrypted);
+            return epass;
+        }
+        private string decryptPass(RijndaelManaged rin, string epass) {
+            ICryptoTransform decryptor = rin.CreateDecryptor();
+            byte[] pass = Convert.FromBase64String(epass);
+            byte[] outblock = decryptor.TransformFinalBlock(pass, 0, pass.Length);
+            string dstring = Encoding.Unicode.GetString(outblock);
+            return dstring;
         }
     }
 }
