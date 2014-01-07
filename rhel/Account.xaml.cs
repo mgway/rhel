@@ -40,9 +40,6 @@ namespace rhel {
         }
 
         public void launchAccount() {
-            if (!this.main.checkClientVersion()) {
-                return;
-            }
             string exefilePath = Path.Combine(this.main.evePath(), "bin", "ExeFile.exe");
             if (!File.Exists(exefilePath)) {
                 this.main.showBalloon("eve path", "could not find " + exefilePath, System.Windows.Forms.ToolTipIcon.Error);

@@ -242,9 +242,9 @@ namespace rhel {
         private void updateEveVersion() {
             if (DateTime.UtcNow > this.getUpdateTime()) {
                 System.Net.WebClient wc = new System.Net.WebClient();
-                string ds = wc.DownloadString(new Uri("http://games.chruker.dk/eve_online/server_status.php"));
+                string ds = wc.DownloadString(new Uri("http://client.eveonline.com/patches/patches.asp?s=&test=&system=win"));
                 string[] var = ds.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.None);
-                this.eveVersion = Convert.ToInt32(var[167].Substring(8));
+                this.eveVersion = Convert.ToInt32(var[104].Substring(29,6));
                 wc.Dispose();
                 updateCheckExpiration = (DateTime.UtcNow + TimeSpan.FromHours(1));
             }
@@ -256,6 +256,7 @@ namespace rhel {
         }
 
         private void startUpdateCheck() {
+            this.checkClientVersion();
             checkUpdate = new Timer(3600000);
             checkUpdate.Enabled = true;
             checkUpdate.Elapsed += new ElapsedEventHandler(checkUpdate_Elapsed);
@@ -263,6 +264,12 @@ namespace rhel {
 
         private void checkUpdate_Elapsed(object source, ElapsedEventArgs e) {
             this.timedUpdate();
+        }
+
+        private void patchClient_Click(object sender, RoutedEventArgs e) {
+            System.Diagnostics.ProcessStartInfo repair = new System.Diagnostics.ProcessStartInfo(@".\repair.exe", "-c");
+            repair.WorkingDirectory = this.evePath();
+            System.Diagnostics.Process.Start(repair);
         }
     }
 }
