@@ -316,5 +316,10 @@ namespace rhel {
             string dstring = Encoding.Unicode.GetString(outblock);
             return dstring;
         }
+
+        private void clientSettings_Click(object sender, RoutedEventArgs e) {
+            SettingsWindow sw = new SettingsWindow();
+            sw.Show();
+        }
     }
 }
