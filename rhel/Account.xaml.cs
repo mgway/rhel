@@ -65,7 +65,7 @@ namespace rhel {
             }
             this.main.showBalloon("logging in", "launching", System.Windows.Forms.ToolTipIcon.None);
             string args = @"/noconsole /ssoToken={0}";
-            if (main.DX9()) {
+            if (Properties.Settings.Default.DX9) {
                 args = args + " /triPlatform=dx9";
             }
             else {

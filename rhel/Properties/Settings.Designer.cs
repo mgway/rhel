@@ -368,5 +368,17 @@ namespace rhel.Properties {
                 this["InteriorShader"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DX9 {
+            get {
+                return ((bool)(this["DX9"]));
+            }
+            set {
+                this["DX9"] = value;
+            }
+        }
     }
 }

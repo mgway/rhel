@@ -4,8 +4,7 @@
         Title="Rapid Heavy EVE Launcher" MinHeight="375" MinWidth="400" Loaded="Window_Loaded" Closing="Window_Closing" ResizeMode="CanResize" StateChanged="Window_StateChanged" Icon="/rhel;component/rhel.ico" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" Height="482" Width="409">
     <Grid>
         <TextBox Height="23" Margin="10,10,136,0" Name="txtEvePath" VerticalAlignment="Top" LostFocus="txtEvePath_LostFocus" />
-        <CheckBox Margin="10,44,138,375" Name="dx9" Checked="setDX9" Unchecked="unsetDX9" >Launch using DirectX 9</CheckBox>
-        <Button Content="browse" Height="23" HorizontalAlignment="Right" Margin="0,12,30,0" Name="browse" VerticalAlignment="Top" Width="93" Click="browse_Click" />
+        <Button Content="browse" Height="23" HorizontalAlignment="Right" Margin="0,9,30,0" Name="browse" VerticalAlignment="Top" Width="93" Click="browse_Click" />
         <ScrollViewer Name="accountView" Margin="0,70,0,0" Height="207" VerticalAlignment="Top">
             <StackPanel Name="accountsPanel" Margin="0,0,0,0" />
         </ScrollViewer>
@@ -14,7 +13,7 @@
         </ScrollViewer>
         <Button Content="add account" Name="addAccount" Margin="10,0,0,12" Click="addAccount_Click" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="93" />
         <Button Content="add group" Name="addGroup" Margin="111,0,0,12" Click="addGroup_Click" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="93" />
-        <Button Content="Patch Client" Name="patchClient" Click="patchClient_Click" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="93" Margin="264,0,0,12" />
-        <Button Content="Client Settings" Name="clientSettings" Click="clientSettings_Click" Height="23" Width="93" Margin="264,40,30,380" />
+        <Button Content="Patch Client" Name="patchClient" Click="patchClient_Click" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="93" Margin="111,0,0,381" />
+        <Button Content="Client Settings" Name="clientSettings" Click="clientSettings_Click" Height="23" Width="93" Margin="10,39,284,381" />
     </Grid>
 </Window>

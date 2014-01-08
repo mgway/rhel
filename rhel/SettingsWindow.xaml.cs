@@ -25,25 +25,25 @@ namespace rhel {
 
         public SettingsWindow() {
             InitializeComponent();
-            string[] split = windowed.Split(":".ToCharArray());
+            string[] split = windowed.Split(new string[] {":"}, StringSplitOptions.None);
             foreach (string s in split) {
                 this.fullscreen.Items.Add(s);
             }
-            split = res.Split(":".ToCharArray());
+            split = res.Split(new string[] {":"}, StringSplitOptions.None);
             foreach (string s in split) {
                 this.resolution.Items.Add(s);
             }
-            split = scale.Split(":".ToCharArray());
+            split = scale.Split(new string[] {":"}, StringSplitOptions.None);
             foreach (string s in split) {
                 this.uiScale.Items.Add(s);
             }
             this.vsync.Items.Add("On");
             this.vsync.Items.Add("Off");
-            split = AA.Split(":".ToCharArray());
+            split = AA.Split(new string[] {":"}, StringSplitOptions.None);
             foreach (string s in split) {
                 antiAlias.Items.Add(s);
             }
-            split = SQ.Split(":".ToCharArray());
+            split = SQ.Split(new string[] {":"}, StringSplitOptions.None);
             ComboBox[] boxes = new ComboBox[4];
             boxes[0]=shaderQuality;
             boxes[1]=textureQuality;
@@ -54,7 +54,7 @@ namespace rhel {
                     box.Items.Add(s);
                 }
             }
-            split = PP.Split(":".ToCharArray());
+            split = PP.Split(new string[] {":"}, StringSplitOptions.None);
             boxes = new ComboBox[2];
             boxes[0] = postProcess;
             boxes[1] = shadowQuality;
@@ -64,7 +64,7 @@ namespace rhel {
                 }
             }
             string mon = "1:2:3:4:5:6";
-            foreach (string s in mon.Split(":".ToCharArray())) {
+            foreach (string s in mon.Split(new string[] {":"}, StringSplitOptions.None)) {
                 this.monitor.Items.Add(s);
             }
             this.interiorShader.Items.Add("Low");
@@ -93,6 +93,7 @@ namespace rhel {
             this.resourceCache.IsChecked = Properties.Settings.Default.ResourceCache;
             this.hdrEnabled.IsChecked = Properties.Settings.Default.HDR;
             this.loadStationEnv.IsChecked = Properties.Settings.Default.LoadStationEnv;
+            this.DX9.IsChecked = Properties.Settings.Default.DX9;
         }
 
         private void okayClick(object sender, RoutedEventArgs e) {
@@ -120,6 +121,7 @@ namespace rhel {
             Properties.Settings.Default.ResourceCache = Convert.ToBoolean(this.resourceCache.IsChecked);
             Properties.Settings.Default.HDR =  Convert.ToBoolean(this.hdrEnabled.IsChecked);
             Properties.Settings.Default.LoadStationEnv =  Convert.ToBoolean(this.loadStationEnv.IsChecked);
+            Properties.Settings.Default.DX9 = Convert.ToBoolean(this.DX9.IsChecked);
             Properties.Settings.Default.Save();
             this.Close();
 

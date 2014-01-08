@@ -1,7 +1,7 @@
 ﻿<Window x:Class="rhel.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="SettingsWindow" Height="348" Width="649">
+        Title="EvE Client Settings" Height="348" Width="649" Icon="/rhel;component/rhel.ico">
     <Grid>
         <ComboBox Name="fullscreen" Height="23" Width="110"  Margin="16,33,500,0" VerticalAlignment="Top" />
         <TextBlock Text="Windowed or Fullscreen" Height="23" Margin="16,12,473,274" />
@@ -25,6 +25,7 @@
         <CheckBox Name="droneModels" Content="Drone Models" Margin="209,132,218,0" Height="23" VerticalAlignment="top"/>
         <CheckBox Name="trails" Content="Trails" Margin="209,152,218,0" Height="23" VerticalAlignment="top"/>
         <CheckBox Name="gpuParticles" Content="GPU Particles" Margin="209,172,218,0" Height="23" VerticalAlignment="top"/>
+        <CheckBox Name="DX9" Content="DirectX9" Margin="209,192,218,0" Height="23" VerticalAlignment="top" />
         <TextBlock Text="Anti-Aliasing" Height="23" Margin="403,72,129,0" VerticalAlignment="top" />
         <ComboBox Name="antiAlias" Height="23" Width="110" Margin="504,70,12,216" VerticalAlignment="top" />
         <TextBlock Text="Post Processing" Height="23" Margin="403,99,129,0" VerticalAlignment="top" />

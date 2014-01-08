@@ -13,7 +13,6 @@ namespace rhel {
     public partial class MainWindow : Window {
         System.Windows.Forms.NotifyIcon tray; // yes, we're using Windows.Forms in a WPF project
         bool saveAccounts = false;
-        bool LaunchDx9 = false;
         int eveVersion;
         EventHandler contextMenuClick;
         DateTime updateCheckExpiration = new DateTime();
@@ -203,18 +202,6 @@ namespace rhel {
         }
         public void showBalloon(string title, string text, System.Windows.Forms.ToolTipIcon icon) {
             this.tray.ShowBalloonTip(1000, title, text, icon);
-        }
-
-        public void setDX9(object sender, RoutedEventArgs e) {
-            this.LaunchDx9 = true;
-        }
-
-        public void unsetDX9(object sender, RoutedEventArgs e) {
-            this.LaunchDx9 = false;
-        }
-
-        public bool DX9() {
-            return this.LaunchDx9;
         }
 
         public DateTime getUpdateTime() {
