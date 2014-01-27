@@ -1,0 +1,12 @@
+﻿<Window x:Class="rhel.uiWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="UI Sync" Height="345" Width="385" ResizeMode="NoResize" Icon="/rhel;component/rhel.ico">
+    <Grid Height="315" Width="372">
+        <ScrollViewer Name="characterView" Margin="0,0,0,42">
+            <StackPanel Name="CharacterPanel" Margin="0" />
+        </ScrollViewer>
+        <Button Content="OK" Name="confirm" Height="23" Width="93" Click="ok_Click" Margin="12,276,0,16" HorizontalAlignment="Left" />
+        <Button Content="Cancel" Name="cancel" Height="23" Width="93" Click="cancel_Click" Margin="111,276,168,16" />
+    </Grid>
+</Window>

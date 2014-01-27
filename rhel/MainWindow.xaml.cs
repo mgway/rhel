@@ -308,5 +308,23 @@ namespace rhel {
             SettingsWindow sw = new SettingsWindow();
             sw.Show();
         }
+
+        private void uiSettings_Click(object sender, RoutedEventArgs e) {
+            uiWindow ui = new uiWindow(this);
+            ui.Show();
+        }
+
+        public string localAppPath() {
+            string appdata = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            appdata += "\\CCP\\EVE\\";
+            string evepath = this.evePath();
+            string[] split = evepath.Split(new string[] { "\\" }, StringSplitOptions.None);
+            split[0] = split[0].Substring(0, 1);
+            foreach (string s in split) {
+                appdata += string.Format("{0}_", s);
+            }
+            appdata += "tranquility";
+            return appdata;
+        }
     }
 }

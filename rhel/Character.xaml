@@ -1,0 +1,13 @@
+﻿<UserControl x:Class="rhel.Character"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="48" d:DesignWidth="340">
+    <Grid>
+        <TextBox Height="23" Margin="12,12,0,0" Name="charName" VerticalAlignment="Top" HorizontalAlignment="Left" Width="135" />
+        <RadioButton Name="mainChar" Content="Main Char" Margin="153,15,60,10" Click="main_Click" />
+        <CheckBox Name="copySettings" Content="Copy settings" Margin="239,15,0,12" />
+    </Grid>
+</UserControl>
