@@ -97,10 +97,12 @@ namespace rhel {
             }
             foreach (Character c in copychars) {
                 System.IO.File.Delete(String.Format("{0}\\core_char_{1}.dat", this.settingsPath, c.charID));
-                System.IO.File.Delete(String.Format("{0}\\core_user_{1}.dat", this.settingsPath, c.accountID.Text));
-
+                if ( mainchar.accountID.Text != c.accountID.Text ) {
+                    System.IO.File.Delete(String.Format("{0}\\core_user_{1}.dat", this.settingsPath, c.accountID.Text));
+                    System.IO.File.Copy(String.Format("{0}\\core_user_{1}.dat", this.settingsPath, mainchar.accountID.Text), String.Format("{0}\\core_user_{1}.dat", this.settingsPath, c.accountID.Text));
+                }
                 System.IO.File.Copy(String.Format("{0}\\core_char_{1}.dat", this.settingsPath, mainchar.charID), String.Format("{0}\\core_char_{1}.dat", this.settingsPath, c.charID));
-                System.IO.File.Copy(String.Format("{0}\\core_user_{1}.dat", this.settingsPath, mainchar.accountID.Text), String.Format("{0}\\core_user_{1}.dat", this.settingsPath, c.accountID.Text));
+                
             }
 
         }
