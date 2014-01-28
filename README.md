@@ -18,6 +18,14 @@ yes, with [2ROT13](https://www.raylu.net/f/2rot13.pdf)
 
 yes
 
+### How do I match account ID's to characters?
+
+As there is no good way that I could find to do this automatically, the best method I can suggest
+
+is to log into each account and take note of the last modified time of the various `core_user_xxxxxxx.dat` files 
+
+in the eve settings directory in `%LOCALAPPDATA%\CCP\EVE\`
+
 ### how does it work?
 
 oh boy. EVE login is done through [OAuth2](http://community.eveonline.com/news/news-channels/eve-online-news/single-sign-on-comes-to-account-management/). normal SSO login happens at
