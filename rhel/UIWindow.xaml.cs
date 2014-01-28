@@ -21,6 +21,7 @@ namespace rhel {
         private string settingsPath;
         private List<int> charIDs;
         private List<int> AccountIDs;
+        private bool saveaccounts = false;
 
         public uiWindow(MainWindow main) {
             InitializeComponent();
@@ -29,6 +30,7 @@ namespace rhel {
             this.charIDs = this.getIDs();
             this.popListFromFile();
             this.popListFromSettings();
+            this.saveaccounts = true;
         }
         private void popListFromSettings() {
             string dlstr = String.Format("https://api.eveonline.com/eve/CharacterName.xml.aspx?ids={0}", getCharIDs());
@@ -72,6 +74,9 @@ namespace rhel {
         }
 
         public void save_characters() {
+            if (this.saveaccounts == false) {
+                return;
+            }
             StringCollection characters = new StringCollection();
             foreach (Character c in this.CharacterPanel.Children) {
                 characters.Add(String.Format("{0},{1},{2}", c.charID, c.accountID.Text, c.charName.Text));
