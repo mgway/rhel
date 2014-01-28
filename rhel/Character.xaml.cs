@@ -31,5 +31,8 @@ namespace rhel {
                 }
             }
         }
+        private void account_Changed(object sender, RoutedEventArgs e) {
+            this.uiwin.save_characters();
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -19,29 +20,45 @@ namespace rhel {
         private MainWindow main;
         private string settingsPath;
         private List<int> charIDs;
-        private System.Net.WebClient wc = new System.Net.WebClient();
+        private List<int> AccountIDs;
+
         public uiWindow(MainWindow main) {
             InitializeComponent();
             this.main = main;
-            this.settingsPath = main.localAppPath() + "\\settings";
+            this.settingsPath = String.Format("{0}\\{1}", main.localAppPath(), "settings");
             this.charIDs = this.getIDs();
-            this.getCharNames();
+            this.popListFromFile();
+            this.popListFromSettings();
         }
-        private void getCharNames() {
+        private void popListFromSettings() {
             string dlstr = String.Format("https://api.eveonline.com/eve/CharacterName.xml.aspx?ids={0}", getCharIDs());
             System.Xml.XmlReader reader = System.Xml.XmlReader.Create(dlstr);
+            List<Character> charlist = new List<Character>();
             while (reader.Read()) {
                 if (reader.HasAttributes) {
                     if (reader.IsEmptyElement) {
                         Character cha = new Character(this);
                         cha.charName.Text = reader.GetAttribute(0);
                         cha.charID = Convert.ToInt32(reader.GetAttribute(1));
-                        this.CharacterPanel.Children.Add(cha);
+                        charlist.Add(cha);
                     }
                 }
 
             }
-            
+            foreach (Character c in charlist) {
+                List<int> idList = new List<int>();
+                if (this.CharacterPanel.Children.Count == 0) {
+                    foreach (Character chara in charlist) {
+                        this.CharacterPanel.Children.Add(chara);
+                    }
+                }
+                foreach( Character chara in this.CharacterPanel.Children ) {
+                    idList.Add(chara.charID);
+                }
+                if (!idList.Contains(c.charID)) {
+                    this.CharacterPanel.Children.Add(c);
+                }
+            }
         }
             
 
@@ -54,51 +71,35 @@ namespace rhel {
             return ids;
         }
 
+        public void save_characters() {
+            StringCollection characters = new StringCollection();
+            foreach (Character c in this.CharacterPanel.Children) {
+                characters.Add(String.Format("{0},{1},{2}", c.charID, c.accountID.Text, c.charName.Text));
+            }
+            Properties.Settings.Default.Characters = characters;
+            Properties.Settings.Default.Save();
+        }
         private void ok_Click(object sender, RoutedEventArgs e) {
             Character mainchar = null;
-            List<Character> chars = new List<Character>();
-            string mainfile = "";
-            List<string> charfiles = new List<string>();
-
+            List<Character> copychars = new List<Character>();
             foreach (Character c in this.CharacterPanel.Children) {
-                if (Convert.ToBoolean(c.mainChar.IsChecked)) {
+                if (c.mainChar.IsChecked == true) {
                     mainchar = c;
-                    break;
+                }
+                if (c.copySettings.IsChecked == true) {
+                    copychars.Add(c);
                 }
             }
-            foreach (Character c in this.CharacterPanel.Children) {
-                if (Convert.ToBoolean(c.copySettings.IsChecked)) {
-                    chars.Add(c);
-                }
+            foreach (Character c in copychars) {
+                System.IO.File.Delete(String.Format("{0}\\core_char_{1}.dat", this.settingsPath, c.charID));
+                System.IO.File.Delete(String.Format("{0}\\core_user_{1}.dat", this.settingsPath, c.accountID.Text));
+
+                System.IO.File.Copy(String.Format("{0}\\core_char_{1}.dat", this.settingsPath, mainchar.charID), String.Format("{0}\\core_char_{1}.dat", this.settingsPath, c.charID));
+                System.IO.File.Copy(String.Format("{0}\\core_user_{1}.dat", this.settingsPath, mainchar.accountID.Text), String.Format("{0}\\core_user_{1}.dat", this.settingsPath, c.accountID.Text));
             }
 
-            foreach (string file in System.IO.Directory.EnumerateFiles(this.settingsPath)) {
-                string[] split = file.Split(new string[] { "core_char_", ".dat" }, StringSplitOptions.None);
-                if (split.Length == 3 && split[1].Length > 1) {
-                    foreach( Character c in chars) {
-                        if ( c.charID ==  Convert.ToInt32(split[1]) ) {
-                            charfiles.Add(file);
-                        }
-                    }
-
-                    if (Convert.ToInt32(split[1]) == mainchar.charID) {
-                        mainfile = file;
-                    }
-                }
-
-
-                foreach (string f in charfiles) {
-                    string backup = f.Substring(0, f.Length - 3) + "bak";
-                    if (!System.IO.File.Exists(backup)) {
-                        System.IO.File.Copy(f, backup);
-                    }
-                    System.IO.File.Delete(file);
-                    System.IO.File.Copy(mainfile, file);
-                }
-            }
-
-            this.Close();
         }
+
         private List<int> getIDs() {
             List<int> temp = new List<int>();
 
@@ -112,6 +113,20 @@ namespace rhel {
         }
         private void cancel_Click(object sender, RoutedEventArgs e) {
             this.Close();
+        }
+
+        private void popListFromFile(){
+            if (Properties.Settings.Default.Characters == null) {
+                return;
+            }
+            foreach ( string chara in Properties.Settings.Default.Characters ) {
+                string[] split = chara.Split(new char[] {','});
+                Character m8 = new Character(this);
+                m8.charID = Convert.ToInt32(split[0]);
+                m8.accountID.Text = split[1];
+                m8.charName.Text = split[2];
+                this.CharacterPanel.Children.Add(m8);
+            }
         }
     }
 }

@@ -380,5 +380,16 @@ namespace rhel.Properties {
                 this["DX9"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection Characters {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["Characters"]));
+            }
+            set {
+                this["Characters"] = value;
+            }
+        }
     }
 }

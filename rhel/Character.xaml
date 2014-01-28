@@ -4,10 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="48" d:DesignWidth="340">
-    <Grid>
-        <TextBox Height="23" Margin="12,12,0,0" Name="charName" VerticalAlignment="Top" HorizontalAlignment="Left" Width="135" />
-        <RadioButton Name="mainChar" Content="Main Char" Margin="153,15,60,10" Click="main_Click" />
-        <CheckBox Name="copySettings" Content="Copy settings" Margin="239,15,0,12" />
+             d:DesignHeight="65" d:DesignWidth="340">
+    <Grid >
+        <TextBox Height="23" Margin="12,0,0,0" Name="charName" VerticalAlignment="Top" HorizontalAlignment="Left" Width="135" />
+        <TextBox Height="23" Margin="12,29,0,0" Name="accountID" VerticalAlignment="Top" HorizontalAlignment="Left" Width="135" TextChanged="account_Changed" />
+        <TextBlock Text="Set Account ID here" Margin="153,32,75,13" />
+        <RadioButton Name="mainChar" Content="Main Char" Margin="153,8,107,42" Click="main_Click" />
+        <CheckBox Name="copySettings" Content="Copy settings" Margin="239,8,12,42" />
     </Grid>
 </UserControl>

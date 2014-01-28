@@ -13,7 +13,7 @@
         </ScrollViewer>
         <Button Content="add account" Name="addAccount" Margin="10,0,0,12" Click="addAccount_Click" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="93" />
         <Button Content="add group" Name="addGroup" Margin="111,0,0,12" Click="addGroup_Click" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="93" />
-        <Button Content="Patch Client" Name="patchClient" Click="patchClient_Click" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="93" Margin="264,0,0,381" />
+        <Button Content="Patch Client" Name="patchClient" Click="patchClient_Click" Margin="210,39,84,381" Height="23" Width="93" />
         <Button Content="WIP" Name="clientSettings" Click="clientSettings_Click" Height="23" Width="93" Margin="10,39,284,381" />
         <Button Content="UI Sync" Name="uiSettings" Click="uiSettings_Click" Height="23" Width="93" Margin="111,39,183,381" />
     </Grid>
