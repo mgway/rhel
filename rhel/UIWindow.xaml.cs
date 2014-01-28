@@ -20,7 +20,6 @@ namespace rhel {
         private MainWindow main;
         private string settingsPath;
         private List<int> charIDs;
-        private List<int> AccountIDs;
         private bool saveaccounts = false;
 
         public uiWindow(MainWindow main) {
@@ -104,7 +103,7 @@ namespace rhel {
                 System.IO.File.Copy(String.Format("{0}\\core_char_{1}.dat", this.settingsPath, mainchar.charID), String.Format("{0}\\core_char_{1}.dat", this.settingsPath, c.charID));
                 
             }
-
+            this.Close();
         }
 
         private List<int> getIDs() {

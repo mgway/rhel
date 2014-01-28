@@ -23,7 +23,6 @@ namespace rhel {
             this.main = main;
             this.parentGroup = group;
             this.addAccounts();
-            this.Title = group.groupname.ToString().Substring(33);
         }
 
         private void okay_Click(object sender, RoutedEventArgs e) {

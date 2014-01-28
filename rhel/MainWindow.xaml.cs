@@ -315,15 +315,17 @@ namespace rhel {
         }
 
         public string localAppPath() {
-            string appdata = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            appdata += "\\CCP\\EVE\\";
+            string startPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            startPath += "\\CCP\\EVE\\";
+            string appdata = startPath;
             string evepath = this.evePath();
-            string[] split = evepath.Split(new string[] { "\\" }, StringSplitOptions.None);
+            string[] split = evepath.Split(new string[] { "\\", " " }, StringSplitOptions.None);
             split[0] = split[0].Substring(0, 1);
             foreach (string s in split) {
                 appdata += string.Format("{0}_", s);
             }
             appdata += "tranquility";
+            string[] splat = appdata.Split(new string[] { " " }, StringSplitOptions.None);
             return appdata;
         }
     }

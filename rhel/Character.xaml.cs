@@ -25,9 +25,11 @@ namespace rhel {
         }
 
         private void main_Click(object sender, RoutedEventArgs e) {
+            this.copySettings.IsEnabled = false;
             foreach (Character c in this.uiwin.CharacterPanel.Children) {
                 if (c != this) {
                     c.mainChar.IsChecked = false;
+                    c.copySettings.IsEnabled = true;
                 }
             }
         }
