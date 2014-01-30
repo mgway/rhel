@@ -1,7 +1,7 @@
 ﻿<Window x:Class="rhel.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Rapid Heavy EVE Launcher" MinHeight="500" MinWidth="410" Loaded="Window_Loaded" Closing="Window_Closing" StateChanged="Window_StateChanged" Icon="/rhel;component/rhel.ico" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" Height="482" Width="409">
+        Title="Rapid Heavy EVE Launcher" MinHeight="500" MinWidth="410" Loaded="Window_Loaded" Closing="Window_Closing" WindowStartupLocation="CenterScreen" StateChanged="Window_StateChanged" Icon="/rhel;component/rhel.ico" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" Height="482" Width="409">
     <Grid>
         <TextBox Height="23" Margin="10,10,136,0" Name="txtEvePath" VerticalAlignment="Top" LostFocus="txtEvePath_LostFocus" />
         <Button Content="browse" Height="23" HorizontalAlignment="Right" Margin="0,9,30,0" Name="browse" VerticalAlignment="Top" Width="93" Click="browse_Click" />

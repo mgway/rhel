@@ -1,7 +1,7 @@
 ﻿<Window x:Class="rhel.uiWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="UI Sync" Closed="Window_Closed" ResizeMode="NoResize" Icon="/rhel;component/rhel.ico" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" Height="345" Width="370">
+        Title="UI Sync" Closed="Window_Closed" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Icon="/rhel;component/rhel.ico" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" Height="345" Width="370">
     <Grid>
         <ScrollViewer Name="characterView" Margin="0,0,0,42">
             <StackPanel Name="CharacterPanel" Margin="0" />

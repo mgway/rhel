@@ -8,7 +8,7 @@ configuration is stored in `%LOCALAPPDATA%\rhel`, but you shouldn't have to touc
 
 ### are there binaries?
 
-https://frosty-nee.net/r/rhel.exe
+http://frosty-nee.net/r/rhel.exe
 
 ### are passwords encrypted?
 
