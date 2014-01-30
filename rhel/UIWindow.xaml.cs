@@ -41,6 +41,11 @@ namespace rhel {
                         Character cha = new Character(this);
                         cha.charName.Text = reader.GetAttribute(0);
                         cha.charID = Convert.ToInt32(reader.GetAttribute(1));
+                        foreach (Account a in main.accountsPanel.Children) {
+                            if (a.charIDs.Contains(cha.charID)) {
+                                cha.accountID = Convert.ToInt32(a.accountID.Text);
+                            }
+                        }
                         charlist.Add(cha);
                     }
                 }
@@ -78,7 +83,7 @@ namespace rhel {
             }
             StringCollection characters = new StringCollection();
             foreach (Character c in this.CharacterPanel.Children) {
-                characters.Add(String.Format("{0},{1},{2}", c.charID, c.accountID.Text, c.charName.Text));
+                characters.Add(String.Format("{0},{1}", c.charID, c.charName.Text));
             }
             Properties.Settings.Default.Characters = characters;
             Properties.Settings.Default.Save();
@@ -96,12 +101,11 @@ namespace rhel {
             }
             foreach (Character c in copychars) {
                 System.IO.File.Delete(String.Format("{0}\\core_char_{1}.dat", this.settingsPath, c.charID));
-                if ( mainchar.accountID.Text != c.accountID.Text ) {
-                    System.IO.File.Delete(String.Format("{0}\\core_user_{1}.dat", this.settingsPath, c.accountID.Text));
-                    System.IO.File.Copy(String.Format("{0}\\core_user_{1}.dat", this.settingsPath, mainchar.accountID.Text), String.Format("{0}\\core_user_{1}.dat", this.settingsPath, c.accountID.Text));
+                if ( mainchar.accountID != c.accountID ) {
+                    System.IO.File.Delete(String.Format("{0}\\core_user_{1}.dat", this.settingsPath, c.accountID));
+                    System.IO.File.Copy(String.Format("{0}\\core_user_{1}.dat", this.settingsPath, mainchar.accountID), String.Format("{0}\\core_user_{1}.dat", this.settingsPath, c.accountID));
                 }
-                System.IO.File.Copy(String.Format("{0}\\core_char_{1}.dat", this.settingsPath, mainchar.charID), String.Format("{0}\\core_char_{1}.dat", this.settingsPath, c.charID));
-                
+                System.IO.File.Copy(String.Format("{0}\\core_char_{1}.dat", this.settingsPath, mainchar.charID), String.Format("{0}\\core_char_{1}.dat", this.settingsPath, c.charID));     
             }
             this.Close();
         }
@@ -128,11 +132,27 @@ namespace rhel {
             foreach ( string chara in Properties.Settings.Default.Characters ) {
                 string[] split = chara.Split(new char[] {','});
                 Character m8 = new Character(this);
-                m8.charID = Convert.ToInt32(split[0]);
-                m8.accountID.Text = split[1];
+                m8.charID = Convert.ToInt32(split[0]);;
                 m8.charName.Text = split[2];
+                foreach (Account a in this.main.accountsPanel.Children) {
+                    if (a.charIDs.Contains(m8.charID)) {
+                        m8.accountID = Convert.ToInt32(a.accountID.Text);
+                    }
+                }
                 this.CharacterPanel.Children.Add(m8);
             }
+        }
+
+        private void selectAll_Click(object sender, RoutedEventArgs e) {
+            foreach (Character c in this.CharacterPanel.Children) {
+                if (c.mainChar.IsChecked == false) {
+                    c.copySettings.IsChecked = true;
+                }
+            }
+        }
+
+        private void Window_Closed(object sender, EventArgs e) {
+            this.save_characters();
         }
     }
 }

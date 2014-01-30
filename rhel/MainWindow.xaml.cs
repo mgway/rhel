@@ -55,9 +55,20 @@ namespace rhel {
             if (Properties.Settings.Default.accounts != null) {
                 foreach (string credentials in Properties.Settings.Default.accounts) {
                     Account account = new Account(this);
-                    string[] split = credentials.Split(new char[] { ':' }, 2);
+                    string[] split = credentials.Split(new char[] { ':' }, 4);
                     account.username.Text = split[0];
                     account.password.Password = this.decryptPass(rjm, split[1]);
+                    if (split.Length > 2) {
+                        account.accountID.Text = split[2];
+                    }
+                    if (split.Length > 3) {
+                        string[] chars = split[3].Split(new char[] { ':' });
+                        foreach (string character in chars) {
+                            if (character != "") {
+                                account.charIDs.Add(Convert.ToInt32(character));
+                            }
+                        }
+                    }
                     this.accountsPanel.Children.Add(account);
                 }
             }
@@ -177,7 +188,10 @@ namespace rhel {
                 return;
             StringCollection accounts = new StringCollection();
             foreach (Account account in this.accountsPanel.Children) {
-                string credentials = String.Format("{0}:{1}", account.username.Text, this.encryptPass(this.rjm,account.password.Password));
+                string credentials = String.Format("{0}:{1}:{2}", account.username.Text, this.encryptPass(this.rjm,account.password.Password), account.accountID.Text);
+                foreach ( int character in account.charIDs ) {
+                    credentials = String.Format("{0}:{1}", credentials, character);
+                }
                 accounts.Add(credentials);
             }
             Properties.Settings.Default.accounts = accounts;

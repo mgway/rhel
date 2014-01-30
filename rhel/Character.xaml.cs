@@ -18,6 +18,7 @@ namespace rhel {
     /// </summary>
     public partial class Character : UserControl {
         public int charID;
+        public int accountID;
         private uiWindow uiwin;
         public Character(uiWindow win) {
             InitializeComponent();
@@ -25,6 +26,7 @@ namespace rhel {
         }
 
         private void main_Click(object sender, RoutedEventArgs e) {
+            this.copySettings.IsChecked = false;
             this.copySettings.IsEnabled = false;
             foreach (Character c in this.uiwin.CharacterPanel.Children) {
                 if (c != this) {

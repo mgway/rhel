@@ -21,14 +21,17 @@ namespace rhel {
     /// Interaction logic for UserControl1.xaml
     /// </summary>
     public partial class Account : UserControl {
-        MainWindow main;
+        public MainWindow main;
         string accessToken;
         DateTime accessTokenExpiration;
+        public List<int> charIDs;
 
         public Account(MainWindow main) {
             InitializeComponent();
             this.main = main;
+            this.charIDs = new List<int>();
         }
+
 
         private void launch_Click(object sender, RoutedEventArgs e) {
             this.launchAccount();
@@ -131,5 +134,25 @@ namespace rhel {
         private void credentialsChanged(object sender, EventArgs e) {
             this.main.updateCredentials();
         }
+            
+        private void charSelect_Click(object sender, RoutedEventArgs e) {
+            CharSelect cs = new CharSelect(this);
+            cs.Show();
+        }
+
+        private void idEnable_Click(object sender, RoutedEventArgs e) {
+            if (this.idEnable.IsChecked == true) {
+                this.accountID.IsEnabled = true;
+            }
+            else {
+                this.accountID.IsEnabled = false;
+            }
+        }
+
+        private void Account_Loaded(object sender, RoutedEventArgs e) {
+
+        }
+
+
     }
 }
