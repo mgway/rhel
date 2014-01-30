@@ -43,7 +43,7 @@ namespace rhel {
                 string[] split = chara.Split(new char[] { ',' });
                 CSelect character = new CSelect();
                 character.charID = Convert.ToInt32(split[0]);
-                character.charName.Text = split[2];
+                character.charName.Text = split[1];
 
                 this.CharacterPanel.Children.Add(character);
                 

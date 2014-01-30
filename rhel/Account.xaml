@@ -11,6 +11,7 @@
         <Button Content="launch" Height="23" Margin="0,9,0,0" Name="launch" VerticalAlignment="Top" HorizontalAlignment="Right" Width="75" Click="launch_Click" />
         <TextBox Height="23" Width="135" Name="accountID" VerticalAlignment="Top" HorizontalAlignment="Left" TextChanged="credentialsChanged" Margin="22,45,0,0" IsEnabled="False"/>
         <CheckBox Name="idEnable" Click="idEnable_Click" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="2,50,0,0" />
-        <Button Name="charSelect" Content="Select Characters" Height="23" Width="115" VerticalAlignment="Top" HorizontalAlignment="Right" Click="charSelect_Click" Margin="0,45,72,0" />
+        <Button Name="charSelect" Content="Select Characters" Height="23" Width="100" VerticalAlignment="Top" HorizontalAlignment="Left" Click="charSelect_Click" Margin="163,44,0,0" />
+        <Button Name="findID" Content="Find ID" Height="23" Width="80" Margin="270,44,0,12" VerticalAlignment="Top" HorizontalAlignment="Left" Click="findID_Click"/>
     </Grid>
 </UserControl>

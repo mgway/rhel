@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.IO;
 using System.Net;
+using System.Diagnostics;
 /*
 using System.Linq;
 using System.Windows.Data;
@@ -25,11 +26,13 @@ namespace rhel {
         string accessToken;
         DateTime accessTokenExpiration;
         public List<int> charIDs;
+        private string settingsPath;
 
         public Account(MainWindow main) {
             InitializeComponent();
             this.main = main;
             this.charIDs = new List<int>();
+            this.settingsPath = String.Format("{0}\\{1}", main.localAppPath(), "settings");
         }
 
 
@@ -151,6 +154,31 @@ namespace rhel {
 
         private void Account_Loaded(object sender, RoutedEventArgs e) {
 
+        }
+
+        private void findID_Click(object sender, RoutedEventArgs e) {
+            System.DateTime time = System.DateTime.UtcNow;
+            this.launchAccount();
+            int ID = 0;
+            while (ID == 0) {
+                var files = System.IO.Directory.EnumerateFiles(this.settingsPath, "core_user_*.dat");
+                foreach (string file in System.IO.Directory.EnumerateFiles(this.settingsPath, "core_user_*.dat" )) {
+
+                    System.DateTime access = System.IO.File.GetLastAccessTimeUtc(file);
+                    string[] split = file.Split(new string[] { "core_user_", ".dat" }, StringSplitOptions.None);
+                    if (split[1] != "_" && access > time) {
+                        time = access;
+                        ID = Convert.ToInt32(split[1]);
+                    }
+
+                }
+                
+            }
+            this.accountID.Text = Convert.ToString(ID);
+            Process[] eve = System.Diagnostics.Process.GetProcessesByName("exefile");
+            foreach (Process aProc in eve) {
+                aProc.Kill();
+            }
         }
 
 

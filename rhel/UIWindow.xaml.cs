@@ -44,8 +44,13 @@ namespace rhel {
                         foreach (Account a in main.accountsPanel.Children) {
                             if (a.charIDs.Contains(cha.charID)) {
                                 cha.accountID = Convert.ToInt32(a.accountID.Text);
+                                break;
+                            }
+                            else {
+                                cha.accountID = 0;
                             }
                         }
+
                         charlist.Add(cha);
                     }
                 }
@@ -95,7 +100,7 @@ namespace rhel {
                 if (c.mainChar.IsChecked == true) {
                     mainchar = c;
                 }
-                if (c.copySettings.IsChecked == true) {
+                if (c.copySettings.IsChecked == true && c.accountID != 0) {
                     copychars.Add(c);
                 }
             }
@@ -133,10 +138,14 @@ namespace rhel {
                 string[] split = chara.Split(new char[] {','});
                 Character m8 = new Character(this);
                 m8.charID = Convert.ToInt32(split[0]);;
-                m8.charName.Text = split[2];
+                m8.charName.Text = split[1];
                 foreach (Account a in this.main.accountsPanel.Children) {
                     if (a.charIDs.Contains(m8.charID)) {
                         m8.accountID = Convert.ToInt32(a.accountID.Text);
+                        break;
+                    }
+                    else {
+                        m8.accountID = 0;
                     }
                 }
                 this.CharacterPanel.Children.Add(m8);
