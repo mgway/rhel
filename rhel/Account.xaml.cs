@@ -45,15 +45,15 @@ namespace rhel {
             this.main.updateCredentials();
         }
 
-        public void launchAccount() {
+        public bool launchAccount() {
             string exefilePath = Path.Combine(this.main.evePath(), "bin", "ExeFile.exe");
             if (!File.Exists(exefilePath)) {
                 this.main.showBalloon("eve path", "could not find " + exefilePath, System.Windows.Forms.ToolTipIcon.Error);
-                return;
+                return false;
             }
             else if (this.username.Text.Length == 0 || this.password.Password.Length == 0) {
                 this.main.showBalloon("logging in", "missing username or password", System.Windows.Forms.ToolTipIcon.Error);
-                return;
+                return false;
             }
             this.main.showBalloon("logging in", this.username.Text, System.Windows.Forms.ToolTipIcon.None);
             string ssoToken = null;
@@ -63,11 +63,11 @@ namespace rhel {
             catch (WebException e) {
                 this.accessToken = null;
                 this.main.showBalloon("logging in", e.Message, System.Windows.Forms.ToolTipIcon.Error);
-                return;
+                return false;
             }
             if (ssoToken == null) {
                 this.main.showBalloon("logging in", "invalid username/password", System.Windows.Forms.ToolTipIcon.Error);
-                return;
+                return false;
             }
             this.main.showBalloon("logging in", "launching", System.Windows.Forms.ToolTipIcon.None);
             string args = @"/noconsole /ssoToken={0}";
@@ -82,6 +82,7 @@ namespace rhel {
             );
             psi.WorkingDirectory = this.main.evePath();
             System.Diagnostics.Process.Start(psi);
+            return true;
         }
 
         private string getAccessToken(string username, string password) {
@@ -158,7 +159,9 @@ namespace rhel {
 
         private void findID_Click(object sender, RoutedEventArgs e) {
             System.DateTime time = System.DateTime.UtcNow;
-            this.launchAccount();
+           if(!this.launchAccount()) {
+               return;
+           }
             int ID = 0;
             while (ID == 0) {
                 var files = System.IO.Directory.EnumerateFiles(this.settingsPath, "core_user_*.dat");
